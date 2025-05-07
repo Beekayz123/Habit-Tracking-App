@@ -71,59 +71,53 @@ To set up the project locally:
    ```bash
    git clone https://github.com/Beekayz123/Habit-Tracking-App.git
 
-Navigate into the project directory:
-cd habit-tracker
-Create and activate a virtual environment:
+# Habit Tracker CLI App
 
-Windows:
+## Setup Instructions
 
-bash
-Copy
-Edit
-python -m venv venv
+### 2. Create and activate a virtual environment
+
+#### For Windows:
+1. Open your terminal (e.g., Command Prompt or PowerShell).
+2. Navigate to the project directory.
+3. Run the following command to create a virtual environment:
+   ```bash
+   python -m venv venv
+Activate the virtual environment:
 venv\Scripts\activate
-macOS/Linux:
+#### For macOS/Linux:
+Open your terminal.
 
-bash
-Copy
-Edit
-python -m venv
+Navigate to the project directory.
+
+Run the following command to create a virtual environment:
+python -m venv 
+Activate the virtual environment:
 source venv/bin/activate
-Install all required dependencies:
 
-bash
-Copy
-Edit
+### 3.  Install all required dependencies
+Run the following command to install the dependencies:
 pip install -r requirements.txt
-Initialize the database:
 
-bash
-Copy
-Edit
+### 4. Initialize the database
 python db.py
-(Optional) Insert sample test data:
 
-bash
-Copy
-Edit
+### 5. (Optional) Insert sample test data
 python test_data_insertion.py
-Run the application:
 
-bash
-Copy
-Edit
+### 6. Run the application
 python main.py
-Usage
+### Usage
 After launching the app, users can register or log in to begin tracking habits.
 
-Main Menu Commands
+### Main Menu Commands
 Create Account
 
 Login
 
 Exit
 
-In-App Commands (after login)
+### In-App Commands (after login)
 Add a Habit
 
 View Habits
@@ -140,37 +134,27 @@ Delete Account
 
 Log Out
 
-Analytics Commands
-1 — View all tracked habits
+### Analytics Commands
+View all tracked habits
 
-2 — Filter habits by daily or weekly frequency
+Filter habits by daily or weekly frequency
 
-3 — Longest streak across all habits
+Longest streak across all habits
 
-4 — Longest streak for a specific habit
+Longest streak for a specific habit
 
 Back — Return to the main menu
 
-Test Data Generation
+### Test Data Generation
 To populate the database with sample user data, run:
-
-bash
-Copy
-Edit
 python test_data_insertion.py
-Testing
+
+### Testing
 The app uses pytest to verify functionality.
-
 Make sure to initialize the database (db.py) before running tests:
-
-bash
-Copy
-Edit
 pytest
-Project Structure
-css
-Copy
-Edit
+
+### Project Structure
 habit-tracker/
 ├── analyze.py
 ├── db.py
@@ -179,24 +163,21 @@ habit-tracker/
 ├── main.py
 ├── test_analyze.py
 ├── test_main.py
+├── test_data_insertion.py    
+├── .gitignore                
 ├── README.md
 └── requirements.txt
-Dependencies
-These libraries are required:
 
+### Dependencies
 questionary
 
 pytest
 
-sqlite3 (Python Standard Library)
+sqlite3 (Standard Library)
 
-os (Python Standard Library)
+os (Standard Library)
 
-datetime (Python Standard Library)
+datetime (Standard Library)
 
 Install all dependencies with:
-
-bash
-Copy
-Edit
 pip install -r requirements.txt

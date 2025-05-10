@@ -9,15 +9,15 @@ from db import create_connection as get_connection
 # ---------------------------
 
 def fetch_all_users(cursor) -> List[Tuple[int, str]]:
-    cursor.execute("SELECT user_id, username FROM users")
+    cursor.execute("SELECT user_id, username FROM user_info")
     return cursor.fetchall()
 
 
 def fetch_all_habits(cursor) -> List[Tuple[str, str]]:
     cursor.execute("""
         SELECT u.username, h.name
-        FROM habits h
-        JOIN users u ON h.user_id = u.user_id
+        FROM habit h
+        JOIN user_info u ON h.user_id = u.user_id
     """)
     return cursor.fetchall()
 
@@ -26,8 +26,8 @@ def fetch_habits_by_periodicity(cursor, periodicity: str) -> List[Tuple[str, str
     try:
         cursor.execute("""
             SELECT u.username, h.name
-            FROM habits h
-            JOIN users u ON h.user_id = u.user_id
+            FROM habit h
+            JOIN user_info u ON h.user_id = u.user_id
             WHERE h.periodicity = ?
         """, (periodicity,))
         return cursor.fetchall()
@@ -36,22 +36,22 @@ def fetch_habits_by_periodicity(cursor, periodicity: str) -> List[Tuple[str, str
         return []
 
 
-def fetch_all_streaks(cursor) -> List[Tuple[str, str, int]]:
+def fetch_all_completions(cursor) -> List[Tuple[str, str, int]]:
     cursor.execute("""
-        SELECT u.username, h.name, s.count
-        FROM habits h
-        JOIN users u ON h.user_id = u.user_id
-        JOIN streak s ON h.habit_id = s.habit_id
+        SELECT u.username, h.name, c.count
+        FROM habit h
+        JOIN user_info u ON h.user_id = u.user_id
+        JOIN completion c ON h.habit_id = c.habit_id
     """)
     return cursor.fetchall()
 
 
-def fetch_streak_for_habit(cursor, habit_name: str) -> List[Tuple[str, int]]:
+def fetch_completions_for_habit(cursor, habit_name: str) -> List[Tuple[str, int]]:
     cursor.execute("""
-        SELECT u.username, s.count
-        FROM habits h
-        JOIN users u ON h.user_id = u.user_id
-        JOIN streak s ON h.habit_id = s.habit_id
+        SELECT u.username, c.count
+        FROM habit h
+        JOIN user_info u ON h.user_id = u.user_id
+        JOIN completion c ON h.habit_id = c.habit_id
         WHERE h.name = ?
     """, (habit_name,))
     return cursor.fetchall()
@@ -96,18 +96,18 @@ def run_analytics():
                         questionary.print(f"⚠️ No {period} habits found.")
 
                 elif choice == "Longest streak across all habits (all users)":
-                    streaks = fetch_all_streaks(cursor)
-                    if streaks:
-                        longest = reduce(lambda a, b: a if a[2] > b[2] else b, streaks)
+                    completions = fetch_all_completions(cursor)
+                    if completions:
+                        longest = reduce(lambda a, b: a if a[2] > b[2] else b, completions)
                         questionary.print(f"🏆 Longest Streak: {longest[1]} by {longest[0]} with {longest[2]} completions")
                     else:
-                        questionary.print("⚠️ No streak data available.")
+                        questionary.print("⚠️ No completion data available.")
 
                 elif choice == "Longest streak for a specific habit (all users)":
                     habit_name = questionary.text("Enter the habit name:").ask()
-                    streaks = fetch_streak_for_habit(cursor, habit_name)
-                    if streaks:
-                        for user, count in streaks:
+                    completions = fetch_completions_for_habit(cursor, habit_name)
+                    if completions:
+                        for user, count in completions:
                             questionary.print(f"🔥 '{habit_name}' by {user} has a streak of {count} completions.")
                     else:
                         questionary.print(f"⚠️ No streaks found for '{habit_name}'.")

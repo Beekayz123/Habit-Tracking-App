@@ -1,4 +1,6 @@
 import sqlite3
+from functools import reduce
+
 import questionary
 from db import create_connection as get_connection
 
@@ -188,6 +190,89 @@ def view_profile(user_id):
         else:
             questionary.print("❌ Profile not found.")
 
+def run_analytics():
+    try:
+        with get_connection() as conn:
+            cursor = conn.cursor()
+            while True:
+                choice = questionary.select(
+                    "📊 Analytics Menu",
+                    choices=[
+                        "1. List all tracked habits",
+                        "2. List habits by periodicity",
+                        "3. Longest streak across all habits",
+                        "4. Longest streak for a specific habit",
+                        "⬅ Back to Main Menu"
+                    ]
+                ).ask()
+
+                if choice == "1. List all tracked habits":
+                    cursor.execute("""
+                        SELECT u.username, h.name 
+                        FROM habits h
+                        JOIN users u ON h.user_id = u.user_id
+                    """)
+                    habits = cursor.fetchall()
+                    if habits:
+                        questionary.print("🗂 All Tracked Habits:")
+                        for user, habit in habits:
+                            questionary.print(f"- {user}: {habit}")
+                    else:
+                        questionary.print("⚠️ No habits found.")
+
+                elif choice == "2. List habits by periodicity":
+                    period = questionary.select("Select periodicity:", choices=["daily", "weekly"]).ask()
+                    cursor.execute("""
+                        SELECT u.username, h.name 
+                        FROM habits h
+                        JOIN users u ON h.user_id = u.user_id
+                        WHERE h.periodicity = ?
+                    """, (period,))
+                    habits = cursor.fetchall()
+                    if habits:
+                        questionary.print(f"📅 {period.capitalize()} Habits:")
+                        for user, habit in habits:
+                            questionary.print(f"- {user}: {habit}")
+                    else:
+                        questionary.print(f"⚠️ No {period} habits found.")
+
+                elif choice == "3. Longest streak across all habits":
+                    cursor.execute("""
+                        SELECT u.username, h.name, s.count
+                        FROM habits h
+                        JOIN users u ON h.user_id = u.user_id
+                        JOIN streak s ON h.habit_id = s.habit_id
+                    """)
+                    streaks = cursor.fetchall()
+                    if streaks:
+                        longest = reduce(lambda a, b: a if a[2] > b[2] else b, streaks)
+                        questionary.print(
+                            f"🏆 Longest Streak: '{longest[1]}' by {longest[0]} with {longest[2]} completions"
+                        )
+                    else:
+                        questionary.print("⚠️ No streak data available.")
+
+                elif choice == "4. Longest streak for a specific habit":
+                    habit_name = questionary.text("Enter habit name:").ask()
+                    cursor.execute("""
+                        SELECT u.username, s.count
+                        FROM habits h
+                        JOIN users u ON h.user_id = u.user_id
+                        JOIN streak s ON h.habit_id = s.habit_id
+                        WHERE h.name = ?
+                    """, (habit_name,))
+                    results = cursor.fetchall()
+                    if results:
+                        for user, count in results:
+                            questionary.print(f"🔥 '{habit_name}' by {user} has a streak of {count}")
+                    else:
+                        questionary.print(f"⚠️ No streaks found for habit '{habit_name}'.")
+
+                elif choice == "⬅ Back to Main Menu":
+                    break
+
+    except Exception as e:
+        questionary.print(f"❌ Error in analytics: {e}")
 
 def delete_account(user_id):
     with get_connection() as conn:
